@@ -20,7 +20,7 @@ public class GameplayScreen implements Screen {
     private Camera camera;
     //controll how the camera vew the world
     private Viewport viewport;
-
+    private GameBoard gameBoard;
 
 
 
@@ -44,10 +44,11 @@ public class GameplayScreen implements Screen {
         shapeRenderer = new ShapeRenderer();
 
         shapeRenderer.setAutoShapeType(true);
+         gameBoard = new GameBoard(new GameplayScreen());
     }
 
     public void cleaScreen(){
-        Gdx.gl.glClearColor(0,0,0,1);
+        Gdx.gl.glClearColor(0.5F,0.5F,0.5F,1.0F);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
     }
@@ -67,19 +68,18 @@ public class GameplayScreen implements Screen {
         // all drawing of shapes must go between begin/end
         shapeRenderer.begin();
         shapeRenderer.set(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(Color.GOLD);
-        shapeRenderer.rect(0,0,100,100);
+        shapeRenderer.setColor(Color.GRAY);
+//        shapeRenderer.rect(0,0,100,100);
         shapeRenderer.end();
 
         //all graphics mush be between the begin and end
         spriteBatch.begin();
-
+        gameBoard.draw(spriteBatch);
         spriteBatch.end();
     }
 
     @Override
     public void resize(int i, int i1) {
-        viewport.update(i, i1);
     }
 
     @Override
