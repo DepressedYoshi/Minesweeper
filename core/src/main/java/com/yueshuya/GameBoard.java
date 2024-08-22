@@ -26,6 +26,9 @@ public class GameBoard {
     private Texture sevenTile;
     private Texture eightTile;
 
+    private final int XOFFSET = 300;
+    private final int YOFFSET = 550;
+
 
     public GameBoard(GameplayScreen gameplayScreen){
         this.gameplayScreen = gameplayScreen;
@@ -117,38 +120,57 @@ public class GameBoard {
             }
         }
     }
+    /*
+     * Given a (mouse_x, mouse_y) position, return the Location on
+     * the board (row, col).
+     * Return null if Location is not valid
+     */
+    public Location getTileAt(int mouse_x, int mouse_y) {
+        //todo fix size adjusting error
+        int col = (mouse_x-XOFFSET)/25;
+        int row =( board.length -1 ) - (YOFFSET - mouse_y) / 25;
+        return new Location(row,col);
+    }
+
+    public void leftClick(int x, int y) {
+        Location target = getTileAt(x,y);
+        if(board[target.getRow()][target.getCol()] < 9 ){
+            board[target.getRow()][target.getCol()] += 10;
+        }
+    }
+
+
     public void draw(SpriteBatch spriteBatch) {
-        int xOffset = 300;
-        int yOffset = 550;
+
         int size = 25;
 
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[0].length; j++) {
                 Texture tile = getTileTexture(board[i][j]);
-                spriteBatch.draw(tile, xOffset + size * j, yOffset - size * i);
+                spriteBatch.draw(tile, XOFFSET + size * j, YOFFSET - size * i);
             }
         }
     }
 
     private Texture getTileTexture(int value) {
         switch (value) {
-            case 1:
+            case 11:
                 return oneTile;
-            case 2:
+            case 12:
                 return twoTile;
-            case 3:
+            case 13:
                 return threeTile;
-            case 4:
+            case 14:
                 return fourTile;
-            case 5:
+            case 15:
                 return fiveTile;
-            case 6:
+            case 16:
                 return sixTile;
-            case 7:
+            case 17:
                 return sevenTile;
-            case 8:
+            case 18:
                 return eightTile;
-            case BOMB:
+            case 9:
                 return bombTile;
             case 10:
                 return emptyFloorTile;
@@ -158,5 +180,4 @@ public class GameBoard {
                 return emptyTile;
         }
     }
-
 }

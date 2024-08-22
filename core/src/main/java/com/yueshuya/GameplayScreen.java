@@ -1,6 +1,7 @@
 package com.yueshuya;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
@@ -38,7 +39,7 @@ public class GameplayScreen implements Screen {
         //update the camera to the changes above
         camera.update();
         // freeze my view to 1280x720 not matter the rsolution of the windows
-        viewport = new FitViewport(12080, 720, camera);
+        viewport = new FitViewport(1280, 720, camera);
         //empty instantiation of all the sawing stuff
         spriteBatch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
@@ -52,6 +53,12 @@ public class GameplayScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
     }
+    private void handleMouseClick() {
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+            gameBoard.leftClick(Gdx.input.getX(), Gdx.input.getY());
+
+        }
+    }
 
     /*
     this method runs as fast as it can or to a set fps
@@ -64,6 +71,8 @@ public class GameplayScreen implements Screen {
     @Override
     public void render(float v) {
         cleaScreen();
+
+        handleMouseClick();
 
         // all drawing of shapes must go between begin/end
         shapeRenderer.begin();
@@ -80,6 +89,8 @@ public class GameplayScreen implements Screen {
 
     @Override
     public void resize(int i, int i1) {
+        viewport.update(i,i1);
+
     }
 
     @Override
