@@ -235,8 +235,6 @@ public class GameBoard {
                 return eightTile;
             case 9:
                 return bombTile;
-            case BOMB:
-                return bombTile;
             case 10:
                 return emptyFloorTile;
             default:
