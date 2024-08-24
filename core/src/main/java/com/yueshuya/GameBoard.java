@@ -11,6 +11,7 @@ public class GameBoard {
     private int numFlags; // the number of flags that sill have to be placed by the player
     public static final int BOMB = -1; // help with readability
     private GameplayScreen gameplayScreen;
+    private MusicManager musicManager;
     private ArrayList<Location> bombSite = new ArrayList<>();
     private Texture emptyTile;
     private Texture emptyFloorTile;
@@ -28,6 +29,7 @@ public class GameBoard {
     private final int YOFFSET = 550;
     public GameBoard(GameplayScreen gameplayScreen){
         this.gameplayScreen = gameplayScreen;
+        musicManager = new MusicManager(gameplayScreen);
         board = new int[16][30];
         numBombs = 50;
         this.numFlags = numBombs;
@@ -35,6 +37,7 @@ public class GameBoard {
     }
     public GameBoard(GameplayScreen gameplayScreen, int numRow, int numCols, int numBombs){
         this.gameplayScreen = gameplayScreen;
+        musicManager = new MusicManager(gameplayScreen);
         board = new int[numRow][numCols];
         this.numBombs = numBombs;
         this.numFlags = numBombs;
@@ -197,12 +200,14 @@ public class GameBoard {
     public void showAllBombs() {
         for (Location l : bombSite){
             board[l.getRow()][l.getCol()] = 9;
+
         }
+        musicManager.playBomb();
     }
     public void gameOver(){
         gameplayScreen.setGameOver(true);
-        bombSite.clear();
         showAllBombs();
+        bombSite.clear();
     }
     public void draw(SpriteBatch spriteBatch) {
 
