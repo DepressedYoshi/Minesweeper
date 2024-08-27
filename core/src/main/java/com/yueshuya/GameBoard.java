@@ -25,14 +25,16 @@ public class GameBoard {
     private Texture sixTile;
     private Texture sevenTile;
     private Texture eightTile;
-    private final int XOFFSET = 300;
-    private final int YOFFSET = 550;
+    private static int XOFFSET = 1280/2;
+    private static int YOFFSET = 720/2;
     public GameBoard(GameplayScreen gameplayScreen){
         this.gameplayScreen = gameplayScreen;
         musicManager = new MusicManager(gameplayScreen);
         board = new int[16][30];
-        numBombs = 50;
+        numBombs = 30;
         this.numFlags = numBombs;
+//        XOFFSET -= 25*(board[0].length/2);
+//        YOFFSET += 25*(board.length/2);
         init();
     }
     public GameBoard(GameplayScreen gameplayScreen, int numRow, int numCols, int numBombs){
@@ -140,9 +142,12 @@ public class GameBoard {
      * Return null if Location is not valid
      */
     public Location getTileAt(int mouse_x, int mouse_y) {
+        if (mouse_y < YOFFSET || mouse_x < XOFFSET)
+            return null;
         //todo fix size adjusting error
         int col = (mouse_x-XOFFSET)/25;
-        int row =( board.length -1 ) - (YOFFSET - mouse_y) / 25;
+        int row = -1 * (YOFFSET - mouse_y) / 25;
+        System.out.println("("+col +", " + row+")");
         Location location = new Location(row,col);
         if (isValid(location)){
             return location;
@@ -161,18 +166,23 @@ public class GameBoard {
         }
         // If we uncover an empty floor, initiate the recursive uncover method
         if (tileValue == 0) {
+            musicManager.playclickSound();
             uncoverArea(clickLoc);
         } else if (tileValue < 9){
+            musicManager.playclickSound();
             // Otherwise, just uncover the clicked tile
             board[clickLoc.getRow()][clickLoc.getCol()] += 10; // Assuming 10 represents uncovered
         }
+
     }
     public void rigtClick(int x, int y) {
         Location target = getTileAt(x,y);
         if(board[target.getRow()][target.getCol()] < 9 ){
+            musicManager.playFlagOn(true);
             board[target.getRow()][target.getCol()] += 20;
             numFlags --;
         } else if (board[target.getRow()][target.getCol()] > 18) {
+            musicManager.playFlagOn(false);
             board[target.getRow()][target.getCol()] -= 20;
             numFlags++;
         }
@@ -202,21 +212,19 @@ public class GameBoard {
             board[l.getRow()][l.getCol()] = 9;
 
         }
-        musicManager.playBomb();
     }
     public void gameOver(){
+        musicManager.playGameOver();
         gameplayScreen.setGameOver(true);
         showAllBombs();
         bombSite.clear();
     }
     public void draw(SpriteBatch spriteBatch) {
-
         int size = 25;
-
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[0].length; j++) {
                 Texture tile = getTileTexture(board[i][j]);
-                spriteBatch.draw(tile, XOFFSET + size * j, YOFFSET - size * i);
+                spriteBatch.draw(tile, XOFFSET + size * j, YOFFSET - size * (i + 1));
             }
         }
     }
@@ -248,5 +256,11 @@ public class GameBoard {
                 else
                     return emptyTile;
         }
+    }
+    public void winSound(){
+        musicManager.playWin();
+    }
+    public void dispose(){
+        musicManager.dispose();
     }
 }

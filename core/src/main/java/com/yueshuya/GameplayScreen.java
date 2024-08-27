@@ -27,12 +27,14 @@ public class GameplayScreen implements Screen {
 
     private boolean gameOver = false;
 
+
+
+
     /*
     runs one time at the very begginging
     all setup should happend here
     ie: load textures, sounds, setup screen, etc
      */
-
     @Override
     public void show() {
         //2D camera
@@ -61,6 +63,7 @@ public class GameplayScreen implements Screen {
             gameOver = true;
         }
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+            System.out.println(Gdx.input.getY());
             gameBoard.leftClick(Gdx.input.getX(), Gdx.input.getY());
         }
         if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)){
@@ -73,6 +76,7 @@ public class GameplayScreen implements Screen {
         }else {
 
             if(gameBoard.playerWon()) {
+                gameBoard.winSound();
                 gameBoard.gameOver();
                 defaultfont.draw(spriteBatch, "GREAT JOB, YOU WIN - press spacebar to play again", 100, 700);
             }
@@ -141,6 +145,7 @@ public class GameplayScreen implements Screen {
     public void dispose() {
         shapeRenderer.dispose();
         spriteBatch.dispose();
+        gameBoard.dispose();
     }
 
     public void setGameOver(boolean b) {

@@ -6,30 +6,54 @@ import com.badlogic.gdx.audio.Sound;
 public class MusicManager {
     private Sound gameOver;
     private Sound playerWin;
-    private Sound clickOnBomb;
     private Sound clickOnTile;
     private Sound bombReveal;
     private Sound optionSelect;
+    private Sound bgm;
+    private Sound flagOn;
+    private Sound flagOff;
 
     public MusicManager(GameplayScreen gameplayScreen){
         loadSound();
+        init();
     }
 
+    private void init(){
+        bgm.loop(0.1f);
+    }
     public void playGameOver(){
-        gameOver.play();
-    }
-
-    public void playBomb(){
         bombReveal.play();
+        bgm.stop();
+    }
+    public void playclickSound(){
+        clickOnTile.play();
     }
 
+    public void playWin(){
+        playerWin.play();
+    }
+    public void dispose(){
+        gameOver.dispose();
+        playerWin.dispose();
+        clickOnTile.dispose();
+        bombReveal.dispose();
+        optionSelect.dispose();
+        bgm.dispose();
+    }
 
+    public void playFlagOn(boolean on){
+        if (on){
+            flagOn.play();
+        }else
+            flagOff.play();
+    }
     private void loadSound(){
         gameOver = Gdx.audio.newSound(Gdx.files.internal("gameOver.wav"));
         playerWin = Gdx.audio.newSound(Gdx.files.internal("playerWin.wav"));
-        clickOnBomb = Gdx.audio.newSound(Gdx.files.internal("bombTile.wav"));
         clickOnTile = Gdx.audio.newSound(Gdx.files.internal("safeTile.wav"));
         bombReveal = Gdx.audio.newSound(Gdx.files.internal("bombReveal.wav"));
-        optionSelect = Gdx.audio.newSound(Gdx.files.internal("gameOver.wav"));
+        flagOn = Gdx.audio.newSound(Gdx.files.internal("flag on.wav"));
+        flagOff = Gdx.audio.newSound(Gdx.files.internal("flag off.wav"));
+        bgm = Gdx.audio.newSound(Gdx.files.internal("Phonk bgm.mp3"));
     }
 }
