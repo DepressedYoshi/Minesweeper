@@ -2,14 +2,13 @@ package com.yueshuya;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-
 import java.util.ArrayList;
 
 public class GameBoard {
-    private int[][] board; // data structure as described in the notes
-    private int numBombs; // number of bombs in the grid
-    private int numFlags; // the number of flags that sill have to be placed by the player
-    public static final int BOMB = -1; // help with readability
+    private int[][] board;
+    private int numBombs;
+    private int numFlags;
+    public static final int BOMB = -1;
     private GameplayScreen gameplayScreen;
     private MusicManager musicManager;
     private ArrayList<Location> bombSite = new ArrayList<>();
@@ -25,65 +24,34 @@ public class GameBoard {
     private Texture sixTile;
     private Texture sevenTile;
     private Texture eightTile;
-    private static int XOFFSET = 1280/2;
-    private static int YOFFSET = 720/2;
-    public GameBoard(GameplayScreen gameplayScreen){
+    private static final int TILE_SIZE = 25;
+    private static final int XOFFSET = 300;
+    private static final int YOFFSET = 500;
+
+    public GameBoard(GameplayScreen gameplayScreen) {
         this.gameplayScreen = gameplayScreen;
         musicManager = new MusicManager(gameplayScreen);
-        board = new int[16][30];
-        numBombs = 30;
-        this.numFlags = numBombs;
-//        XOFFSET -= 25*(board[0].length/2);
-//        YOFFSET += 25*(board.length/2);
-        init();
-    }
-    public GameBoard(GameplayScreen gameplayScreen, int numRow, int numCols, int numBombs){
-        this.gameplayScreen = gameplayScreen;
-        musicManager = new MusicManager(gameplayScreen);
-        board = new int[numRow][numCols];
-        this.numBombs = numBombs;
+        board = new int[20][30];
+        numBombs = 50;
         this.numFlags = numBombs;
         init();
     }
-    public int getNumBombs() {
-        return numBombs;
-    }
-    public int getNumFlags() {
-        return numFlags;
-    }
-    private void init(){
+
+    private void init() {
         loadGraphics();
         placeBomb();
         numberBoard();
     }
-    private void placeBomb(){
-        int placed = 0;
-        while (placed < numBombs){
-            int rowRandom = (int) (Math.random()*board.length);
-            int colRandom = (int) (Math.random()*board[0].length);
-            if (board[rowRandom][colRandom] != BOMB){
-                board[rowRandom][colRandom] = BOMB;
-                bombSite.add(new Location(rowRandom,colRandom));
-                placed++;
-            }
 
-        }
+    public int getNumBombs() {
+        return numBombs;
     }
-    //pre-condition: numFlag is zero
-    public boolean playerWon() {
-        boolean ans = true;
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board[0].length; j++) {
-                if (board[i][j] < 10){
-                    ans = false;
-                    break;
-                }
-            }
-        }
 
-        return ans;
+    public int getNumFlags() {
+        return numFlags;
     }
-    private void loadGraphics(){
+
+    private void loadGraphics() {
         emptyTile = new Texture("emptyTile.jpg");
         bombTile = new Texture("bomb.jpg");
         emptyFloorTile = new Texture("empty floor.jpg");
@@ -96,18 +64,63 @@ public class GameBoard {
         sixTile = new Texture("sixTile.jpg");
         sevenTile = new Texture("sevenTile.jpg");
         eightTile = new Texture("eightTile.jpg");
+    }
 
+    private void placeBomb() {
+        int placed = 0;
+        while (placed < numBombs) {
+            int rowRandom = (int) (Math.random() * board.length);
+            int colRandom = (int) (Math.random() * board[0].length);
+            if (board[rowRandom][colRandom] != BOMB) {
+                board[rowRandom][colRandom] = BOMB;
+                bombSite.add(new Location(rowRandom, colRandom));
+                placed++;
+            }
+        }
     }
+    public boolean playerWon() {
+        boolean ans = true;
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[0].length; j++) {
+                if (board[i][j] < 10){
+                    ans = false;
+                    break;
+                }
+            }
+        }
+        return ans;
+    }
+
+    private void numberBoard() {
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[0].length; j++) {
+                if (board[i][j] != BOMB) {
+                    board[i][j] = countBomb(getNeighbors(new Location(i, j)));
+                }
+            }
+        }
+    }
+
+    public Location getTileAt(int mouseX, int mouseY) {
+        int col = (mouseX - XOFFSET) / TILE_SIZE;
+        int row = (YOFFSET - mouseY) / TILE_SIZE;
+        Location location = new Location(row, col);
+        if (isValid(location)) {
+            return location;
+        } else {
+            return null;
+        }
+    }
+
     private boolean isValid(Location loc) {
-        boolean notTooBig = loc.getRow() < board.length && loc.getCol() < board[0].length;
-        boolean notTooSmall = loc.getRow() >=0 && loc.getCol() >=0;
-        return notTooBig && notTooSmall;
+        return loc.getRow() >= 0 && loc.getRow() < board.length && loc.getCol() >= 0 && loc.getCol() < board[0].length;
     }
+
     private ArrayList<Location> getNeighbors(Location loc) {
         ArrayList<Location> neighbors = new ArrayList<>();
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
-                if (i != 0 || j != 0) { // Exclude the center location
+                if (i != 0 || j != 0) {
                     Location neighbor = new Location(loc.getRow() + i, loc.getCol() + j);
                     if (isValid(neighbor)) {
                         neighbors.add(neighbor);
@@ -116,151 +129,128 @@ public class GameBoard {
             }
         }
         return neighbors;
-
     }
-    private int countBomb(ArrayList<Location> neibors){
+
+    private int countBomb(ArrayList<Location> neighbors) {
         int count = 0;
-        for(Location l : neibors){
-            if (board[l.getRow()][l.getCol()] == BOMB){
-                count+=1;
+        for (Location l : neighbors) {
+            if (board[l.getRow()][l.getCol()] == BOMB) {
+                count++;
             }
         }
         return count;
     }
-    private void numberBoard() {
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board[0].length; j++) {
-                if (board[i][j] != BOMB){
-                    board [i][j] = countBomb(getNeighbors(new Location(i,j)));
-                }
-            }
-        }
-    }
-    /*
-     * Given a (mouse_x, mouse_y) position, return the Location on
-     * the board (row, col).
-     * Return null if Location is not valid
-     */
-    public Location getTileAt(int mouse_x, int mouse_y) {
-        if (mouse_y < YOFFSET || mouse_x < XOFFSET)
-            return null;
-        //todo fix size adjusting error
-        int col = (mouse_x-XOFFSET)/25;
-        int row = -1 * (YOFFSET - mouse_y) / 25;
-        System.out.println("("+col +", " + row+")");
-        Location location = new Location(row,col);
-        if (isValid(location)){
-            return location;
-        }else
-            return null;
-    }
+
     public void leftClick(int x, int y) {
         Location clickLoc = getTileAt(x, y);
-        // If the click is outside the board, do nothing
-        if (clickLoc == null) {return;}
+        if (clickLoc == null) {
+            return;
+        }
         int tileValue = board[clickLoc.getRow()][clickLoc.getCol()];
-        // Handle click on a bomb (game over condition can be handled here)
         if (tileValue == BOMB) {
             gameOver();
-            return;
-        }
-        // If we uncover an empty floor, initiate the recursive uncover method
-        if (tileValue == 0) {
+        } else if (tileValue == 0) {
             musicManager.playclickSound();
             uncoverArea(clickLoc);
-        } else if (tileValue < 9){
+        } else if (tileValue < 9) {
             musicManager.playclickSound();
-            // Otherwise, just uncover the clicked tile
-            board[clickLoc.getRow()][clickLoc.getCol()] += 10; // Assuming 10 represents uncovered
+            board[clickLoc.getRow()][clickLoc.getCol()] += 10;  // Mark the tile as uncovered
         }
-
     }
-    public void rigtClick(int x, int y) {
-        Location target = getTileAt(x,y);
-        if(board[target.getRow()][target.getCol()] < 9 ){
-            musicManager.playFlagOn(true);
-            board[target.getRow()][target.getCol()] += 20;
-            numFlags --;
-        } else if (board[target.getRow()][target.getCol()] > 18) {
-            musicManager.playFlagOn(false);
-            board[target.getRow()][target.getCol()] -= 20;
-            numFlags++;
-        }
 
-    }
-    //recursive method that "propogates" through the board uncovering an area of empty tiles, and
-//the surrounding numbers
-    private void uncoverArea(Location loc) {
-        int row = loc.getRow();
-        int col = loc.getCol();
-        int tileVal = board[row][col];
-        if (!isValid(loc) || tileVal >= 10) {
+    public void rightClick(int x, int y) {
+        Location target = getTileAt(x, y);
+        if (target == null) {
             return;
         }
-        if (tileVal < 9 && tileVal != BOMB)
-            board[row][col] += 10;
+        int tileValue = board[target.getRow()][target.getCol()];
+        if (tileValue < 9) {
+            musicManager.playFlagOn(true);
+            board[target.getRow()][target.getCol()] += 20;  // Flag the tile
+            numFlags--;
+        } else if (tileValue >18) {
+            musicManager.playFlagOn(false);
+            board[target.getRow()][target.getCol()] -= 20;  // Unflag the tile
+            numFlags++;
+        }
+    }
+
+    private void uncoverArea(Location loc) {
+        if (!isValid(loc) || board[loc.getRow()][loc.getCol()] >= 10) {
+            return;
+        }
+        if (board[loc.getRow()][loc.getCol()] < 9 && board[loc.getRow()][loc.getCol()] != BOMB) {
+            board[loc.getRow()][loc.getCol()] += 10;  // Mark the tile as uncovered
+        }
         if (countBomb(getNeighbors(loc)) > 0) {
             return;
         }
-        // Recurse into all neighboring tiles
         for (Location neighbor : getNeighbors(loc)) {
             uncoverArea(neighbor);
         }
     }
-    public void showAllBombs() {
-        for (Location l : bombSite){
-            board[l.getRow()][l.getCol()] = 9;
 
+    public void showAllBombs() {
+        for (Location loc : bombSite) {
+            board[loc.getRow()][loc.getCol()] = 9;  // Reveal all bombs
         }
     }
-    public void gameOver(){
+
+    public void gameOver() {
         musicManager.playGameOver();
         gameplayScreen.setGameOver(true);
         showAllBombs();
         bombSite.clear();
     }
+
     public void draw(SpriteBatch spriteBatch) {
-        int size = 25;
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[0].length; j++) {
                 Texture tile = getTileTexture(board[i][j]);
-                spriteBatch.draw(tile, XOFFSET + size * j, YOFFSET - size * (i + 1));
+                spriteBatch.draw(tile, XOFFSET + TILE_SIZE * j, YOFFSET - TILE_SIZE * (i + 1));
             }
         }
     }
+
     private Texture getTileTexture(int value) {
         switch (value) {
-            case 11:
-                return oneTile;
-            case 12:
-                return twoTile;
-            case 13:
-                return threeTile;
-            case 14:
-                return fourTile;
-            case 15:
-                return fiveTile;
-            case 16:
-                return sixTile;
-            case 17:
-                return sevenTile;
-            case 18:
-                return eightTile;
-            case 9:
-                return bombTile;
-            case 10:
-                return emptyFloorTile;
+            case 11: return oneTile;
+            case 12: return twoTile;
+            case 13: return threeTile;
+            case 14: return fourTile;
+            case 15: return fiveTile;
+            case 16: return sixTile;
+            case 17: return sevenTile;
+            case 18: return eightTile;
+            case 9: return bombTile;
+            case 10: return emptyFloorTile;
             default:
-                if (value > 18)
+                if (value > 18) {
                     return flagTile;
-                else
+                } else {
                     return emptyTile;
+                }
         }
     }
-    public void winSound(){
+
+    public void winSound() {
         musicManager.playWin();
     }
-    public void dispose(){
+
+    public void dispose() {
         musicManager.dispose();
+        emptyTile.dispose();
+        bombTile.dispose();
+        emptyFloorTile.dispose();
+        flagTile.dispose();
+        oneTile.dispose();
+        twoTile.dispose();
+        threeTile.dispose();
+        fourTile.dispose();
+        fiveTile.dispose();
+        sixTile.dispose();
+        sevenTile.dispose();
+        eightTile.dispose();
     }
 }
+
