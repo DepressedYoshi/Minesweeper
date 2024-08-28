@@ -25,13 +25,13 @@ public class GameBoard {
     private Texture sevenTile;
     private Texture eightTile;
     private static final int TILE_SIZE = 25;
-    private static final int XOFFSET = 300;
-    private static final int YOFFSET = 500;
+    private static final int XOFFSET = 265;
+    private static final int YOFFSET = 560;
 
     public GameBoard(GameplayScreen gameplayScreen) {
         this.gameplayScreen = gameplayScreen;
         musicManager = new MusicManager(gameplayScreen);
-        board = new int[20][30];
+        board = new int[16][30];
         numBombs = 50;
         this.numFlags = numBombs;
         init();
