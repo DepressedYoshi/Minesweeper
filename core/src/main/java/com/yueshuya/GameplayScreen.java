@@ -48,6 +48,7 @@ public class GameplayScreen implements Screen {
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
             Vector2 worldCoordinates = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
             gameBoard.leftClick((int) worldCoordinates.x, (int) worldCoordinates.y);
+            System.out.println((int) worldCoordinates.x + "  "+(int) worldCoordinates.y);
         }
         if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
             Vector2 worldCoordinates = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));

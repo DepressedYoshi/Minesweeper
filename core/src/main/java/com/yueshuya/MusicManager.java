@@ -19,7 +19,7 @@ public class MusicManager {
     }
 
     private void init(){
-        bgm.loop(0.1f);
+        bgm.loop(0.2f);
     }
     public void playGameOver(){
         bombReveal.play();

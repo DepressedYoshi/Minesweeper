@@ -32,7 +32,7 @@ public class GameBoard {
         this.gameplayScreen = gameplayScreen;
         musicManager = new MusicManager(gameplayScreen);
         board = new int[16][30];
-        numBombs = 50;
+        numBombs = 80;
         this.numFlags = numBombs;
         init();
     }
@@ -102,6 +102,7 @@ public class GameBoard {
     }
 
     public Location getTileAt(int mouseX, int mouseY) {
+        if (mouseX < XOFFSET || mouseY > YOFFSET){return null;}
         int col = (mouseX - XOFFSET) / TILE_SIZE;
         int row = (YOFFSET - mouseY) / TILE_SIZE;
         Location location = new Location(row, col);
