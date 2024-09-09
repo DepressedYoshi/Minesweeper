@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -20,8 +21,9 @@ public class GameplayScreen implements Screen {
     private Camera camera;
     private Viewport viewport;
     private GameBoard gameBoard;
-    private BitmapFont defaultFont = new BitmapFont();
+    private BitmapFont customFont;
     private boolean gameOver = false;
+    private float gameTimer = 0; // Timer variable
 
     @Override
     public void show() {
@@ -34,6 +36,14 @@ public class GameplayScreen implements Screen {
         shapeRenderer = new ShapeRenderer();
         shapeRenderer.setAutoShapeType(true);
         gameBoard = new GameBoard(this);
+
+        // Load custom font
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("BebasNeue-Regular.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.size = 24; // Adjust font size
+        parameter.color = Color.WHITE; // Font color
+        customFont = generator.generateFont(parameter);
+        generator.dispose(); // Don't forget to dispose generator after use
     }
 
     public void clearScreen() {
@@ -58,14 +68,15 @@ public class GameplayScreen implements Screen {
 
     private void drawGUI() {
         if (!gameOver) {
-            defaultFont.draw(spriteBatch, "Bombs left to flag: " + gameBoard.getNumFlags(), 100, 700);
-       } else {
+            customFont.draw(spriteBatch, "Bombs left to flag: " + gameBoard.getNumFlags(), 100, 700);
+            customFont.draw(spriteBatch, "Time: " + (int) gameTimer + " seconds", 100, 670); // Display timer
+        } else {
             if (gameBoard.playerWon()) {
                 gameBoard.winSound();
                 gameBoard.gameOver();
-                defaultFont.draw(spriteBatch, "GREAT JOB, YOU WIN - press spacebar to play again", 100, 700);
+                customFont.draw(spriteBatch, "GREAT JOB, YOU WIN - press spacebar to play again", 100, 700);
             } else {
-                defaultFont.draw(spriteBatch, "YOU LOSE - press spacebar to play again", 100, 700);
+                customFont.draw(spriteBatch, "YOU LOSE - press spacebar to play again", 100, 700);
             }
         }
     }
@@ -74,6 +85,7 @@ public class GameplayScreen implements Screen {
         if (gameOver && Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             gameBoard = new GameBoard(this);
             gameOver = false;
+            gameTimer = 0; // Reset timer when a new game starts
         }
     }
 
@@ -81,6 +93,7 @@ public class GameplayScreen implements Screen {
     public void render(float delta) {
         clearScreen();
         if (!gameOver) {
+            gameTimer += delta; // Increment timer if game is ongoing
             handleMouseClick();
         }
         handleKeyPresses();
@@ -115,6 +128,7 @@ public class GameplayScreen implements Screen {
         shapeRenderer.dispose();
         spriteBatch.dispose();
         gameBoard.dispose();
+        customFont.dispose(); // Dispose font when no longer needed
     }
 
     public void setGameOver(boolean gameOver) {
