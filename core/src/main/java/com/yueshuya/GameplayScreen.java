@@ -49,7 +49,7 @@ public class GameplayScreen implements Screen {
 
         layout = new GlyphLayout();
 
-        backgroundTexture = new Texture(Gdx.files.internal("realbackgd.gif"));
+        backgroundTexture = new Texture(Gdx.files.internal("bg.png"));
 
     }
 
