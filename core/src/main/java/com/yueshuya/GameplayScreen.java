@@ -3,11 +3,9 @@ package com.yueshuya;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -23,7 +21,11 @@ public class GameplayScreen implements Screen {
     private GameBoard gameBoard;
     private BitmapFont customFont;
     private boolean gameOver = false;
-    private float gameTimer = 0; // Timer variable
+    private float gameTimer = 0;
+    private GlyphLayout layout; // Used to measure text width
+    private Texture backgroundTexture; // Background image
+
+
 
     @Override
     public void show() {
@@ -40,10 +42,15 @@ public class GameplayScreen implements Screen {
         // Load custom font
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("BebasNeue-Regular.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        parameter.size = 24; // Adjust font size
+        parameter.size = 36; // Adjust font size
         parameter.color = Color.WHITE; // Font color
         customFont = generator.generateFont(parameter);
-        generator.dispose(); // Don't forget to dispose generator after use
+        generator.dispose();
+
+        layout = new GlyphLayout();
+
+        backgroundTexture = new Texture(Gdx.files.internal("realbackgd.gif"));
+
     }
 
     public void clearScreen() {
@@ -58,7 +65,6 @@ public class GameplayScreen implements Screen {
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
             Vector2 worldCoordinates = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
             gameBoard.leftClick((int) worldCoordinates.x, (int) worldCoordinates.y);
-            System.out.println((int) worldCoordinates.x + "  "+(int) worldCoordinates.y);
         }
         if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
             Vector2 worldCoordinates = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
@@ -67,18 +73,31 @@ public class GameplayScreen implements Screen {
     }
 
     private void drawGUI() {
+        float screenWidth = viewport.getWorldWidth(); // Get the width of the screen
+
         if (!gameOver) {
-            customFont.draw(spriteBatch, "Bombs left to flag: " + gameBoard.getNumFlags(), 100, 700);
-            customFont.draw(spriteBatch, "Time: " + (int) gameTimer + " seconds", 100, 670); // Display timer
+            layout.setText(customFont, "Bombs left to flag: " + gameBoard.getNumFlags());
+            customFont.draw(spriteBatch, layout, (screenWidth - layout.width) / 2, 680); // Centered text
+
+            layout.setText(customFont, "Time: " + (int) gameTimer + " seconds");
+            customFont.draw(spriteBatch, layout, (screenWidth - layout.width) / 2, 620); // Centered text
         } else {
+            String gameOverText;
             if (gameBoard.playerWon()) {
-                gameBoard.winSound();
-                gameBoard.gameOver();
-                customFont.draw(spriteBatch, "GREAT JOB, YOU WIN - press spacebar to play again", 100, 700);
+                gameOverText = "GREAT JOB, YOU WIN - press spacebar to play again";
             } else {
-                customFont.draw(spriteBatch, "YOU LOSE - press spacebar to play again", 100, 700);
+                gameOverText = "YOU LOSE - press spacebar to play again";
             }
+
+            // Draw game over text centered
+            layout.setText(customFont, gameOverText);
+            customFont.draw(spriteBatch, layout, (screenWidth - layout.width) / 2, 680);
+
+            // Keep displaying the time even when game over, also centered
+            layout.setText(customFont, "Time: " + (int) gameTimer + " seconds");
+            customFont.draw(spriteBatch, layout, (screenWidth - layout.width) / 2, 620);
         }
+
     }
 
     private void handleKeyPresses() {
@@ -101,6 +120,7 @@ public class GameplayScreen implements Screen {
         shapeRenderer.setColor(Color.GRAY);
         shapeRenderer.end();
         spriteBatch.begin();
+        spriteBatch.draw(backgroundTexture, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
         gameBoard.draw(spriteBatch);
         drawGUI();
         spriteBatch.end();
